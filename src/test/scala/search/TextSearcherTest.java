@@ -205,4 +205,27 @@ public class TextSearcherTest {
 		Assert.assertFalse(lexer.isWord("1029388 "));
 		Assert.assertFalse(lexer.isWord("123,456"));
 	}
+
+
+	/** Hit at last word should still work. */
+	@Test
+	public void testLastWord() throws Exception {
+		String[] expected = { "middle AtVeryEnd" };
+		File file = new File("files/word_at_very_end.txt");
+		TextSearcher searcher = new TextSearcher(file);
+		String[] results = searcher.search("AtVeryEnd", 1);
+		assertArraysEqual(expected, results);
+	}
+
+	/** Hit at first word should still work. */
+	@Test
+	public void testFirstWord() throws Exception {
+		String[] expected = { "AtVeryBeginning middle middle AtVeryEnd" };
+		File file = new File("files/word_at_very_end.txt");
+		TextSearcher searcher = new TextSearcher(file);
+		String[] results = searcher.search("AtVeryBeginning", 3);
+		assertArraysEqual(expected, results);
+	}
+
+
 }
