@@ -1,0 +1,165 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <!-- Note: Some content is default from archetype used to create this.  -->
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.us.dsb</groupId>
+  <artifactId>expl-text-searcher-scala</artifactId>
+  <version>1.0-SNAPSHOT</version>
+  <name>${project.artifactId}</name>
+  <description>Scala exploration "project"</description>
+  <inceptionYear>2016</inceptionYear>
+  <licenses>
+    <license>
+      <name>My License</name>
+      <url>http://....</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <properties>
+    <!--
+    -->
+      <scala.version>2.10.4</scala.version>
+      <scala.compat.version>2.10</scala.compat.version>
+    <!--
+    <scala.version>2.10.5</scala.version>
+    <scala.compat.version>2.10</scala.compat.version>
+    <scala.version>2.11.8</scala.version>
+    <scala.compat.version>2.11</scala.compat.version>
+    <json4s.version>3.2.10</json4s.version>
+    -->
+    <json4s.version>3.4.0</json4s.version>
+    <!--
+    -->
+    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.target>1.8</maven.compiler.target>
+    <encoding>UTF-8</encoding>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.scala-lang</groupId>
+      <artifactId>scala-library</artifactId>
+      <version>${scala.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.scala-lang</groupId>
+      <artifactId>scala-reflect</artifactId>
+      <version>${scala.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.scala-lang</groupId>
+      <artifactId>scala-swing</artifactId>
+      <version>${scala.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.scalaz</groupId>
+      <artifactId>scalaz-core_${scala.compat.version}</artifactId>
+      <version>7.2.23</version>  <!-- (..._2.10_) 7.2.23: 2018-05-15 -->
+    </dependency>
+
+    <dependency>
+      <!-- org.json4s.* (308),
+           org.json4s.prefs (7),
+           org.json4s.reflect (111)
+           -->
+      <groupId>org.json4s</groupId>
+      <artifactId>json4s-core_${scala.compat.version}</artifactId>
+      <version>${json4s.version}</version>
+    </dependency>
+
+    <!--dependency>
+      <!- - org.json4s.* (371)  - ->
+      <groupId>org.json4s</groupId>
+      <artifactId>json4s-ast_${scala.compat.version}</artifactId>
+      <version>${json4s.version}</version>
+    </dependency-->
+    <dependency>
+      <!-- org.json4s.native.* (49) -->
+      <groupId>org.json4s</groupId>
+      <artifactId>json4s-native_${scala.compat.version}</artifactId>
+      <version>${json4s.version}</version>
+    </dependency>
+    <dependency>
+      <!-- org.json4s.jackson.* (28) -->
+      <groupId>org.json4s</groupId>
+      <artifactId>json4s-jackson_${scala.compat.version}</artifactId>
+      <version>${json4s.version}</version>
+    </dependency>
+
+    <!-- Test -->
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.12</version>  <!-- 4.12: 2014-12-04 -->
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.scalatest</groupId>
+      <artifactId>scalatest_${scala.compat.version}</artifactId>
+      <version>3.0.4</version>  <!-- 3.0.4: 2017-08-17 -->
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.specs2</groupId>
+      <artifactId>specs2-core_${scala.compat.version}</artifactId>
+      <version>3.9.4</version> <!-- 3.9.4: 2017-07-16 -->
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.specs2</groupId>
+      <artifactId>specs2-junit_${scala.compat.version}</artifactId>
+      <version>3.9.4</version>
+      <scope>test</scope>
+    </dependency>
+
+  </dependencies>
+
+  <build>
+    <sourceDirectory>src/main/scala</sourceDirectory>
+    <testSourceDirectory>src/test/scala</testSourceDirectory>
+    <plugins>
+      <plugin>
+        <!-- see http://davidb.github.com/scala-maven-plugin -->
+        <groupId>net.alchim31.maven</groupId>
+        <artifactId>scala-maven-plugin</artifactId>
+        <version>3.2.0</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>compile</goal>
+              <goal>testCompile</goal>
+            </goals>
+            <configuration>
+              <args>
+                <!--?? <arg>-make:transitive</arg> -->
+                <arg>-deprecation</arg>
+                <arg>-feature</arg>
+                <arg>-Xlint</arg>
+                <arg>-dependencyfile</arg>
+                <arg>${project.build.directory}/.scala_dependencies</arg>
+              </args>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>2.18.1</version>
+        <configuration>
+          <useFile>false</useFile>
+          <disableXmlReport>true</disableXmlReport>
+          <!-- If you have classpath issue like NoDefClassError,... -->
+          <!-- useManifestOnlyJar>false</useManifestOnlyJar -->
+          <includes>
+            <include>**/*Test.*</include>
+            <include>**/*Suite.*</include>
+          </includes>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>
