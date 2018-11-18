@@ -41,8 +41,6 @@ class TextSearcherCore(indexedText: String) {
       Occurrence(occurrenceOffset, lastWordStartOffset, wordEndOffset)
     }
 
-    // (Trying two different ways of doing enumerations.)
-
     sealed trait TokenizerState
     case object InWord  extends TokenizerState
     case object InOther extends TokenizerState
@@ -97,36 +95,35 @@ class TextSearcherCore(indexedText: String) {
     val queryWordOccurrences: Seq[Occurrence] =
       occurrenceListsByWord.getOrElse(canonicalQueryWord, Nil)
 
-    // (Named values to try to make semantics of uses clearer.)
-    val xxminOccIndex = 0
-    val xxmaxOccIndex = wordOccurrences.size - 1 // (Indexed)
-    val xxminTextCharOffset = 0
-    val xxmaxTextCharOffset = indexedText.length // (Used as range)
-
     val hitsInContext = queryWordOccurrences.map(occurrence => {
       val hitOccIndex: Int = occurrence.occIndex
 
-      val contextStartCharOffset2 = {
+      // Compute context start--starting character offset of word occurrence
+      //   contextWords before, if any; otherwise, first character offset of
+      //   input text.
+      val contextStartCharOffset = {
         val startOccurrenceIndex = hitOccIndex - contextWords
         if (wordOccurrences.isDefinedAt(startOccurrenceIndex)) {
           wordOccurrences(startOccurrenceIndex).startChOffset
         }
         else {
-          xxminTextCharOffset
+          indexedText.indices.start
         }
       }
-      val contextEndCharOffset2 = {
+      // Compute context end--similar to start, except re later occurrence and
+      //   end of input.
+      val contextEndCharOffset = {
         val endOccurrenceIndex = hitOccIndex + contextWords
         if (wordOccurrences.isDefinedAt(endOccurrenceIndex)) {
           wordOccurrences(endOccurrenceIndex).endChOffset
         }
         else {
-          xxmaxTextCharOffset
+          indexedText.indices.end
         }
       }
 
-      val hitInContext = indexedText.substring(contextStartCharOffset2,
-                                               contextEndCharOffset2)
+      val hitInContext = indexedText.substring(contextStartCharOffset,
+                                               contextEndCharOffset)
       hitInContext
     })
     hitsInContext.toArray
