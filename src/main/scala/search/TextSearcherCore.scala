@@ -15,9 +15,14 @@ class TextSearcherCore(indexedText: String) {
                                 startChOffset: Int,
                                 endChOffset: Int)
 
-  //??? maybe extract method, then declare "... wordOccurrences = m(...)"
+  //??? maybe extract method, then declare "... wordOccurrences = m(...)",
+  // so occurrenceListsByWord can be declared close by (so they and indexedText
+  // are all declared near the top of the class; maybe move methods to separate
+  // class (nested? sibling?)
 
-  private val wordOccurrences = {
+  private val wordOccurrences: Vector[Occurrence] = {
+
+    // Note:  This block of code doesn't seem to be as clean as it could be.
 
     sealed trait CharClass
     case object WordChar  extends CharClass
@@ -25,52 +30,50 @@ class TextSearcherCore(indexedText: String) {
 
     def charClassOf(ch: Char): CharClass = {
       val isWordChar =
-      ('0' <= ch && ch <= '9') ||
-      ('A' <= ch && ch <= 'Z') ||
-      ('a' <= ch && ch <= 'z') ||
-      ''' == ch
+        ''' == ch ||
+        ('0' <= ch && ch <= '9') ||
+        ('A' <= ch && ch <= 'Z') ||
+        ('a' <= ch && ch <= 'z')
       if (isWordChar) WordChar else OtherChar
     }
 
-    var occurrenceCount = 0
-    var lastWordStartOffset = -1
+    val occurrences = collection.mutable.ArrayBuffer[Occurrence]()
 
-    def buildOccurrence(wordEndOffset: Int): Occurrence = {
-      val occurrenceOffset = occurrenceCount
-      occurrenceCount += 1
-      Occurrence(occurrenceOffset, lastWordStartOffset, wordEndOffset)
+    def addOccurrence(startCharOffset: Int,
+                      endCharOffset: Int): Unit = {
+      val occurrenceOffset = occurrences.size
+      occurrences += Occurrence(occurrenceOffset, startCharOffset, endCharOffset)
     }
 
-    sealed trait TokenizerState
-    case object InWord  extends TokenizerState
-    case object InOther extends TokenizerState
+    sealed trait LexState
+    case object InWord  extends LexState
+    case object InOther extends LexState
 
-    var inWord: TokenizerState = InOther
-    (indexedText + ' ')   //????? try to fix end hack (avoid copying input)
-        .zipWithIndex.flatMap({ case (ch, offset) =>
+    var lexState: LexState = InOther
+    var lastWordStartOffset = -1
 
-      (inWord, charClassOf(ch)) match {
+    indexedText.zipWithIndex.foreach({ case (ch, offset) =>
+      (lexState, charClassOf(ch)) match {
         case (InOther, OtherChar) =>  // another non-word char
-          None
         case (InOther, WordChar) =>   // first character of word--word start
-          inWord = InWord
-          lastWordStartOffset = offset
-          None
+          lexState = InWord
+          lastWordStartOffset = offset  // remember start offset
         case (InWord,  WordChar) =>   // another word char
-          None
         case (InWord,  OtherChar) =>  // non-word char after word--word end
-          inWord = InOther
-          Some(buildOccurrence(offset))
+          lexState = InOther
+          addOccurrence(lastWordStartOffset, offset)  // add word
       }
-
-
     })
+    if (lexState == InWord) {
+      addOccurrence(lastWordStartOffset, indexedText.indices.end)
+    }
+    occurrences.toVector
   }
 
   private def canonicalizeWord(word: String): String = word.toLowerCase
 
   //?? Maybe optimize:  index each occurrence as we find occurrences, when
-  //   characters we just scanned, and Occurrences we created,  are still in cache
+  //   characters we just scanned, and Occurrences we created, are still in cache
 
   private val occurrenceListsByWord: collection.Map[String, Seq[Occurrence]] = {
     val index = collection.mutable.Map[String, Seq[Occurrence]]()
