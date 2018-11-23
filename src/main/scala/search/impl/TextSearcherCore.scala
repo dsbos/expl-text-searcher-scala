@@ -19,7 +19,7 @@ class TextSearcherCore(indexedText: String) {
 
     def charClassOf(ch: Char): CharClass = {
       val isWordChar =
-        ''' == ch ||
+        '\'' == ch ||
         ('0' <= ch && ch <= '9') ||
         ('A' <= ch && ch <= 'Z') ||
         ('a' <= ch && ch <= 'z')
