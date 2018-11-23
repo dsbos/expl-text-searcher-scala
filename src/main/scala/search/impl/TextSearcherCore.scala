@@ -1,4 +1,4 @@
-package search
+package search.impl
 
 
 class TextSearcherCore(indexedText: String) {
