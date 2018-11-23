@@ -3,11 +3,10 @@ package search.impl
 
 class TextSearcherCore(indexedText: String) {
 
-
-  //??? maybe extract method, then declare "... wordOccurrences = m(...)",
+  // TODO:  Probably extract method, then declare "... wordOccurrences = m(...)",
   // so occurrenceListsByWord can be declared close by (so they and indexedText
-  // are all declared near the top of the class; maybe move methods to separate
-  // class (nested? sibling?)
+  // are all declared near the top of the class as fields frequently are;
+  // probably move methods to separate class.
 
   private val wordOccurrences: Vector[Occurrence] = {
 
@@ -61,7 +60,7 @@ class TextSearcherCore(indexedText: String) {
 
   private def canonicalizeWord(word: String): String = word.toLowerCase
 
-  //?? Maybe optimize:  index each occurrence as we find occurrences, when
+  // Maybe optimize:  index each occurrence as we find occurrences, when
   //   characters we just scanned, and Occurrences we created, are still in cache
 
   private val occurrenceListsByWord: collection.Map[String, Seq[Occurrence]] = {
